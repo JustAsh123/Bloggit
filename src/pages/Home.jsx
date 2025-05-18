@@ -5,11 +5,7 @@ function Home(){
 
     return(
         <div>
-            {currentUser?(
-                <h1>Welcome, {username}</h1>
-            ):(
-                <h1>Please Log in.</h1>
-            )}
+            <h1>Homepage</h1>
         </div>
     )
 }

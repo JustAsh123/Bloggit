@@ -17,6 +17,14 @@ function Navbar() {
       console.log(error);
     }
   }
+  
+  const toUpload = () => {
+    
+  }
+
+  const toProfile = () => {
+    navigate("/profile");
+  }
 
   const toSignup = () => {
     navigate("/signup");
@@ -77,8 +85,13 @@ function Navbar() {
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                       <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" onClick={toProfile} href="#">
                           Profile
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" onClick={toUpload} href="#">
+                          NewPost
                         </a>
                       </li>
                       <li>
