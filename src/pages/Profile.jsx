@@ -1,4 +1,5 @@
 import { useAuth } from "../hooks/useAuth"
+import BlogGrid from "../components/BlogGrid";
 import { useNavigate } from "react-router-dom";
 
 function Profile(){
@@ -8,7 +9,7 @@ function Profile(){
     if(!currentUser) navigate("/");
 
     return (
-        <h1>Welcome, {username}</h1>
+        <><h1>Welcome, {username}</h1><BlogGrid page={"Profile"} /></>
     )
 }
 
