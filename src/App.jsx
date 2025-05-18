@@ -5,6 +5,8 @@ import "./styles/App.css"
 import Home from "./pages/Home"
 import Login from "./pages/Login"
 import Profile from "./pages/Profile"
+import UploadBlog from "./pages/UploadBlog"
+
 function App() {
   return (
     <>
@@ -14,6 +16,7 @@ function App() {
         <Route path="/" element={<Home />}/>
         <Route path="/login" element={<Login />}/>
         <Route path="/profile" element={<Profile />}/>
+        <Route path="/upload" element={<UploadBlog />}/>
       </Routes>
     </>
   )

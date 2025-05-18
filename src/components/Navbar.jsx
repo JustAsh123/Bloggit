@@ -19,7 +19,7 @@ function Navbar() {
   }
   
   const toUpload = () => {
-    
+    navigate("/upload")
   }
 
   const toProfile = () => {
