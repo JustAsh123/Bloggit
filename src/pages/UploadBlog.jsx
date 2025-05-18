@@ -2,10 +2,11 @@ import { useState } from "react";
 import { db } from "../firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 function UploadBlog() {
   const { currentUser, username } = useAuth();
-
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
@@ -49,6 +50,7 @@ function UploadBlog() {
       setTitle("");
       setContent("");
       setImage(null);
+      navigate("/");
     } catch (err) {
       setError("Failed to upload blog.");
       console.error(err);

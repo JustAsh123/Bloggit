@@ -34,11 +34,15 @@ function Navbar() {
     navigate("/login");
   };
 
+  const toHome = () => {
+    navigate("/")
+  }
+
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
         <div className="container-fluid">
-          <a className="navbar-brand" href="#">
+          <a className="navbar-brand" onClick={toHome}>
             Home
           </a>
           <button
@@ -85,17 +89,17 @@ function Navbar() {
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                       <li>
-                        <a class="dropdown-item" onClick={toProfile} href="#">
+                        <a class="dropdown-item" onClick={toProfile}>
                           Profile
                         </a>
                       </li>
                       <li>
-                        <a class="dropdown-item" onClick={toUpload} href="#">
+                        <a class="dropdown-item" onClick={toUpload}>
                           NewPost
                         </a>
                       </li>
                       <li>
-                        <a class="dropdown-item" onClick={handleSignout} href="#">
+                        <a class="dropdown-item" onClick={handleSignout}>
                           Sign out
                         </a>
                       </li>
