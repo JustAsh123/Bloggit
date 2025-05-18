@@ -1,7 +1,14 @@
 // src/components/BlogGrid.jsx
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
+import { db, auth } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
@@ -46,11 +53,51 @@ function BlogGrid({ page, blogs: externalBlogs }) {
     }));
   };
 
+  const toggleLike = async (blogId) => {
+    if (!auth.currentUser) {
+      alert("You must be logged in to like posts!");
+      return;
+    }
+
+    const blogRef = doc(db, "blogs", blogId);
+    const userId = auth.currentUser.uid;
+
+    const blog = blogs.find((b) => b.id === blogId);
+    if (!blog) return;
+
+    const userLiked = blog.likes?.includes(userId);
+
+    try {
+      if (userLiked) {
+        await updateDoc(blogRef, { likes: arrayRemove(userId) });
+      } else {
+        await updateDoc(blogRef, { likes: arrayUnion(userId) });
+      }
+      // Optimistic UI update:
+      setBlogs((prevBlogs) =>
+        prevBlogs.map((b) =>
+          b.id === blogId
+            ? {
+                ...b,
+                likes: userLiked
+                  ? b.likes.filter((id) => id !== userId)
+                  : [...(b.likes || []), userId],
+              }
+            : b
+        )
+      );
+    } catch (error) {
+      console.error("Error updating likes:", error);
+    }
+  };
+
   return (
     <div className="container mt-4">
       <div className="row">
         {blogs.map((blog) => {
           const orientation = imageOrientations[blog.id] || "landscape";
+          const likesCount = blog.likes ? blog.likes.length : 0;
+          const isLiked = blog.likes?.includes(auth.currentUser?.uid);
 
           return (
             <div className="col-md-4 mb-4" key={blog.id}>
@@ -78,12 +125,20 @@ function BlogGrid({ page, blogs: externalBlogs }) {
                   <p className="text-muted mt-auto mb-2">
                     By{" "}
                     <a
+                      href="#!"
                       onClick={() => navigate(`/profile/${blog.authorName}`)}
-                      style={{ cursor: "pointer", textDecoration: "underline" }}
                     >
                       {blog.authorName}
                     </a>
                   </p>
+                  <button
+                    className={`btn btn-sm ${
+                      isLiked ? "btn-danger" : "btn-outline-danger"
+                    }`}
+                    onClick={() => toggleLike(blog.id)}
+                  >
+                    {isLiked ? "♥" : "♡"} {likesCount}
+                  </button>
                 </div>
               </div>
             </div>
