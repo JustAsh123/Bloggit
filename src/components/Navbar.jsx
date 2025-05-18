@@ -4,6 +4,8 @@ import { useAuth } from "../hooks/useAuth";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 
+import { Link } from "react-router-dom";
+
 function Navbar() {
   const navigate = useNavigate();
   const { currentUser, username } = useAuth();
@@ -23,7 +25,7 @@ function Navbar() {
   }
 
   const toProfile = () => {
-    navigate("/profile");
+    navigate(`/profile/${username}`);
   }
 
   const toSignup = () => {
@@ -89,9 +91,7 @@ function Navbar() {
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                       <li>
-                        <a class="dropdown-item" onClick={toProfile}>
-                          Profile
-                        </a>
+                        <a className="dropdown-item" onClick={toProfile}>My Profile</a>
                       </li>
                       <li>
                         <a class="dropdown-item" onClick={toUpload}>

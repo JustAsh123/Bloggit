@@ -1,27 +1,28 @@
+// src/components/BlogGrid.jsx
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
-function BlogGrid({ page }) {
+function BlogGrid({ page, blogs: externalBlogs }) {
   const [blogs, setBlogs] = useState([]);
   const { username, loading } = useAuth();
-
-  // Store image orientations per blog id
+  const navigate = useNavigate();
   const [imageOrientations, setImageOrientations] = useState({});
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         const blogSnap = await getDocs(collection(db, "blogs"));
-        const blogList = blogSnap.docs.map(doc => ({
+        const blogList = blogSnap.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
         if (page === "Profile") {
-          if (!username || loading) return; // Wait for username to load
-          setBlogs(blogList.filter(blog => blog.authorName === username));
+          if (!username || loading) return;
+          setBlogs(blogList.filter((blog) => blog.authorName === username));
         } else {
           setBlogs(blogList);
         }
@@ -30,13 +31,16 @@ function BlogGrid({ page }) {
       }
     };
 
-    fetchBlogs();
-  }, [page, username, loading]);
+    if (externalBlogs) {
+      setBlogs(externalBlogs);
+    } else {
+      fetchBlogs();
+    }
+  }, [page, username, loading, externalBlogs]);
 
-  // Handler when image loads, detect orientation
   const onImageLoad = (e, blogId) => {
     const { naturalWidth, naturalHeight } = e.target;
-    setImageOrientations(prev => ({
+    setImageOrientations((prev) => ({
       ...prev,
       [blogId]: naturalHeight > naturalWidth ? "portrait" : "landscape",
     }));
@@ -45,7 +49,7 @@ function BlogGrid({ page }) {
   return (
     <div className="container mt-4">
       <div className="row">
-        {blogs.map(blog => {
+        {blogs.map((blog) => {
           const orientation = imageOrientations[blog.id] || "landscape";
 
           return (
@@ -58,7 +62,12 @@ function BlogGrid({ page }) {
                     onLoad={(e) => onImageLoad(e, blog.id)}
                     style={
                       orientation === "portrait"
-                        ? { width: "auto", maxHeight: "300px", display: "block", margin: "0 auto" }
+                        ? {
+                            width: "auto",
+                            maxHeight: "300px",
+                            display: "block",
+                            margin: "0 auto",
+                          }
                         : { width: "100%", height: "auto" }
                     }
                   />
@@ -66,10 +75,15 @@ function BlogGrid({ page }) {
                 <div className="card-body d-flex flex-column">
                   <h5 className="card-title">{blog.title}</h5>
                   <p className="card-text">{blog.content}</p>
-                  <p className="text-muted mt-auto mb-2">By {blog.authorName}</p>
-                  <button className="btn btn-primary btn-sm" disabled>
-                    Read More
-                  </button>
+                  <p className="text-muted mt-auto mb-2">
+                    By{" "}
+                    <a
+                      onClick={() => navigate(`/profile/${blog.authorName}`)}
+                      style={{ cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      {blog.authorName}
+                    </a>
+                  </p>
                 </div>
               </div>
             </div>
