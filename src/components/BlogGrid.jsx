@@ -28,6 +28,12 @@ function BlogGrid({ page, blogs: externalBlogs }) {
           ...doc.data(),
         }));
 
+        blogList.sort((a, b) => {
+          const aTime = a.createdAt?.toMillis() || 0;
+          const bTime = b.createdAt?.toMillis() || 0;
+          return bTime - aTime;
+        });
+
         if (page === "Profile") {
           if (!username || loading) return;
           setBlogs(blogList.filter((blog) => blog.authorName === username));
