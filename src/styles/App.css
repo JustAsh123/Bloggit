@@ -14,3 +14,8 @@
 .card:hover .card-img-top {
   transform: scale(1.05);
 }
+
+body {
+  overflow-x: hidden;
+  padding-top: 56px; /* only if your navbar is fixed */
+}

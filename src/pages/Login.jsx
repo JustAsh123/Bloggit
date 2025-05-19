@@ -1,3 +1,4 @@
+// src/pages/Login.jsx
 import { useState } from "react";
 import { auth } from "../firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -15,7 +16,6 @@ function Login() {
 
     try {
       await signInWithEmailAndPassword(auth, email, pass);
-      // Redirect after login
       navigate("/");
     } catch (err) {
       setError("Invalid email or password");
@@ -23,9 +23,12 @@ function Login() {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100">
-      <div className="card w-50">
-        <h5 className="card-header">Login</h5>
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{ minHeight: "calc(100vh - 56px)", paddingTop: "20px", paddingBottom: "20px" }}
+    >
+      <div className="card w-100 mx-3" style={{ maxWidth: "400px" }}>
+        <h5 className="card-header text-center">Login</h5>
         <div className="card-body">
           {error && <div className="alert alert-danger">{error}</div>}
           <form onSubmit={handleLogin}>
@@ -49,7 +52,7 @@ function Login() {
                 required
               />
             </div>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary w-100">
               Log In
             </button>
           </form>

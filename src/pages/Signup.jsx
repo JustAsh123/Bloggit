@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
-
+import {
+  doc,
+  setDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
@@ -13,14 +19,15 @@ function Signup() {
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
 
-    const {currentUser, usn} = useAuth();
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
-  const navigate = useNavigate("/");
-
-    useEffect(()=>{
-        alert("Already signed in.")
-        if(currentUser){navigate("/")}
-    },[])
+  useEffect(() => {
+    if (currentUser) {
+      alert("Already signed in.");
+      navigate("/");
+    }
+  }, [currentUser, navigate]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -31,8 +38,10 @@ function Signup() {
     }
 
     try {
-      // Check if username is unique
-      const q = query(collection(db, "users"), where("username", "==", username));
+      const q = query(
+        collection(db, "users"),
+        where("username", "==", username)
+      );
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
         return setError("Username already taken");
@@ -40,21 +49,24 @@ function Signup() {
 
       const userCred = await createUserWithEmailAndPassword(auth, email, pass);
 
-      // Save username to Firestore
       await setDoc(doc(db, "users", userCred.user.uid), {
-        username: username,
-        email: email,
+        username,
+        email,
       });
-      navigate("/")
+
+      navigate("/");
     } catch (err) {
       setError(err.message);
     }
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100">
-      <div className="card w-50">
-        <h5 className="card-header">Sign Up!</h5>
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{ minHeight: "calc(100vh - 56px)", paddingTop: "20px", paddingBottom: "20px" }}
+    >
+      <div className="card w-100 mx-3" style={{ maxWidth: "500px" }}>
+        <h5 className="card-header text-center">Sign Up!</h5>
         <div className="card-body">
           {error && <div className="alert alert-danger">{error}</div>}
           <form onSubmit={handleSignup}>
@@ -98,7 +110,7 @@ function Signup() {
                 required
               />
             </div>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary w-100">
               Sign Up
             </button>
           </form>
