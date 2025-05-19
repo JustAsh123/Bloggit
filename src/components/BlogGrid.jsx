@@ -5,6 +5,7 @@ import {
   getDocs,
   doc,
   updateDoc,
+  deleteDoc,
   arrayUnion,
   arrayRemove,
 } from "firebase/firestore";
@@ -91,6 +92,19 @@ function BlogGrid({ page, blogs: externalBlogs }) {
     }
   };
 
+  const handleDelete = async (blogId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this blog?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteDoc(doc(db, "blogs", blogId));
+      setBlogs((prev) => prev.filter((b) => b.id !== blogId));
+    } catch (err) {
+      console.error("Error deleting blog:", err);
+      alert("Failed to delete blog.");
+    }
+  };
+
   return (
     <div className="container mt-4">
       <div className="row">
@@ -139,6 +153,16 @@ function BlogGrid({ page, blogs: externalBlogs }) {
                   >
                     {isLiked ? "♥" : "♡"} {likesCount}
                   </button>
+
+                  {/* Show delete button only on Profile page and if current user is author */}
+                  {page === "Profile" && blog.authorId === auth.currentUser?.uid && (
+                    <button
+                      className="btn btn-sm btn-outline-secondary mt-2"
+                      onClick={() => handleDelete(blog.id)}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

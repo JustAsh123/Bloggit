@@ -32,7 +32,7 @@ function Profile() {
   return (
     <div className="container mt-4">
       <h2 className="mb-3">Posts by {username}</h2>
-      <BlogGrid blogs={blogs} />
+      <BlogGrid blogs={blogs} page="Profile" />
     </div>
   );
 }
