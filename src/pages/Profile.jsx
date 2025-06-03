@@ -1,33 +1,34 @@
 // src/pages/Profile.jsx
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where, updateDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import BlogGrid from "../components/BlogGrid";
 import "../styles/Profile.css";
 import { Pencil } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { doc } from "firebase/firestore";
 
 function Profile() {
   const { displayName } = useParams();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pfp, setPfp] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null); // [NEW] for storing selected image file
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false); // NEW
   const { username } = useAuth();
   const navigate = useNavigate();
 
   const isOwnProfile = displayName === username;
 
-  // [NEW] handle PFP upload to Cloudinary and update Firestore
   const handleChangePfp = async () => {
     if (!selectedFile) return;
 
+    setUploading(true);
+
     const formData = new FormData();
     formData.append("file", selectedFile);
-    formData.append("upload_preset", "blog_uploads"); // Replace with your Cloudinary preset
+    formData.append("upload_preset", "blog_uploads");
 
     try {
       const res = await fetch("https://api.cloudinary.com/v1_1/djxmd61lq/image/upload", {
@@ -44,12 +45,15 @@ function Profile() {
         await updateDoc(doc(db, "users", userDoc.id), {
           profilePic: imageUrl,
         });
-        setPfp(imageUrl); // update UI
-        setSelectedFile(null); // reset selection
-        navigate(`/profile/${displayName}`)
+        setPfp(imageUrl);
+        setSelectedFile(null);
+        navigate(`/profile/${displayName}`);
       }
     } catch (error) {
       console.error("Error uploading profile pic:", error);
+    } finally {
+      setUploading(false);
+      document.getElementById("closeModalBtn")?.click();
     }
   };
 
@@ -73,8 +77,6 @@ function Profile() {
       }
     };
 
-    fetchBlogs();
-
     const fetchPfp = async () => {
       try {
         const q = query(
@@ -96,6 +98,7 @@ function Profile() {
       }
     };
 
+    fetchBlogs();
     fetchPfp();
   }, [displayName]);
 
@@ -148,14 +151,22 @@ function Profile() {
                 className="btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"
+                id="closeModalBtn" // NEW
               ></button>
             </div>
             <div className="modal-body">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setSelectedFile(e.target.files[0])} // [NEW]
-              />
+              {uploading ? (
+                <div className="text-center">
+                  <div className="spinner-border text-primary" role="status"></div>
+                  <p className="mt-2">Uploading image...</p>
+                </div>
+              ) : (
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setSelectedFile(e.target.files[0])}
+                />
+              )}
             </div>
             <div className="modal-footer">
               <button
@@ -168,8 +179,8 @@ function Profile() {
               <button
                 type="button"
                 className="btn btn-primary"
-                data-bs-dismiss="modal" // closes modal after save
-                onClick={handleChangePfp} // [NEW]
+                onClick={handleChangePfp}
+                disabled={uploading} // Disable button while uploading
               >
                 Save changes
               </button>
