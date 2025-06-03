@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   collection,
   getDocs,
+  getDoc,
   doc,
   updateDoc,
   deleteDoc,
@@ -18,6 +19,7 @@ function BlogGrid({ page, blogs: externalBlogs }) {
   const { username, loading } = useAuth();
   const navigate = useNavigate();
   const [imageOrientations, setImageOrientations] = useState({});
+  const [authorProfiles, setAuthorProfiles] = useState({});
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -34,12 +36,29 @@ function BlogGrid({ page, blogs: externalBlogs }) {
           return bTime - aTime;
         });
 
+        let filteredBlogs = blogList;
         if (page === "Profile") {
           if (!username || loading) return;
-          setBlogs(blogList.filter((blog) => blog.authorName === username));
-        } else {
-          setBlogs(blogList);
+          filteredBlogs = blogList.filter((blog) => blog.authorName === username);
         }
+
+        setBlogs(filteredBlogs);
+
+        // Fetch profile pictures
+        const uniqueUserIds = [
+          ...new Set(filteredBlogs.map((blog) => blog.authorId)),
+        ];
+        const userProfiles = {};
+        await Promise.all(
+          uniqueUserIds.map(async (userId) => {
+            const userRef = doc(db, "users", userId);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists()) {
+              userProfiles[userId] = userSnap.data();
+            }
+          })
+        );
+        setAuthorProfiles(userProfiles);
       } catch (err) {
         console.error("Error fetching blogs:", err);
       }
@@ -68,7 +87,6 @@ function BlogGrid({ page, blogs: externalBlogs }) {
 
     const blogRef = doc(db, "blogs", blogId);
     const userId = auth.currentUser.uid;
-
     const blog = blogs.find((b) => b.id === blogId);
     if (!blog) return;
 
@@ -80,7 +98,6 @@ function BlogGrid({ page, blogs: externalBlogs }) {
       } else {
         await updateDoc(blogRef, { likes: arrayUnion(userId) });
       }
-      // Optimistic UI update:
       setBlogs((prevBlogs) =>
         prevBlogs.map((b) =>
           b.id === blogId
@@ -118,6 +135,9 @@ function BlogGrid({ page, blogs: externalBlogs }) {
           const orientation = imageOrientations[blog.id] || "landscape";
           const likesCount = blog.likes ? blog.likes.length : 0;
           const isLiked = blog.likes?.includes(auth.currentUser?.uid);
+          const author = authorProfiles[blog.authorId];
+          const profilePictureUrl =
+            author?.profilePic || "/default.png";
 
           return (
             <div className="col-md-4 mb-4" key={blog.id}>
@@ -142,15 +162,26 @@ function BlogGrid({ page, blogs: externalBlogs }) {
                 <div className="card-body d-flex flex-column">
                   <h5 className="card-title">{blog.title}</h5>
                   <p className="card-text">{blog.content}</p>
-                  <p className="text-muted mt-auto mb-2">
-                    By{" "}
+                  <div className="d-flex align-items-center mt-auto mb-2">
+                    <img
+                      src={profilePictureUrl}
+                      alt="Author"
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        marginRight: "8px",
+                      }}
+                    />
                     <a
                       href="#!"
                       onClick={() => navigate(`/profile/${blog.authorName}`)}
+                      className="text-muted text-decoration-none"
                     >
                       {blog.authorName}
                     </a>
-                  </p>
+                  </div>
                   <button
                     className={`btn btn-sm ${
                       isLiked ? "btn-danger" : "btn-outline-danger"
@@ -159,16 +190,15 @@ function BlogGrid({ page, blogs: externalBlogs }) {
                   >
                     {isLiked ? "♥" : "♡"} {likesCount}
                   </button>
-
-                  {/* Show delete button only on Profile page and if current user is author */}
-                  {page === "Profile" && blog.authorId === auth.currentUser?.uid && (
-                    <button
-                      className="btn btn-sm btn-outline-secondary mt-2"
-                      onClick={() => handleDelete(blog.id)}
-                    >
-                      Delete
-                    </button>
-                  )}
+                  {page === "Profile" &&
+                    blog.authorId === auth.currentUser?.uid && (
+                      <button
+                        className="btn btn-sm btn-outline-secondary mt-2"
+                        onClick={() => handleDelete(blog.id)}
+                      >
+                        Delete
+                      </button>
+                    )}
                 </div>
               </div>
             </div>
