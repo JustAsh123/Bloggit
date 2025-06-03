@@ -80,7 +80,7 @@ function Navbar() {
                 </>
               ) : (
                 <>
-                  <div class="dropdown">
+                  <div className="dropdown">
                     <button
                       class="btn btn-secondary dropdown-toggle"
                       type="button"

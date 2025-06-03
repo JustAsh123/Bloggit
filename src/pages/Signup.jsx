@@ -52,6 +52,7 @@ function Signup() {
       await setDoc(doc(db, "users", userCred.user.uid), {
         username,
         email,
+        profilePic : ""
       });
 
       navigate("/");
