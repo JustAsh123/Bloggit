@@ -1,44 +1,109 @@
+/* Container layout */
+.container.mt-4.d-flex {
+  padding: 0 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Profile Picture Styling */
+.profile-pfp {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #3a3a3a;
+  transition: transform 0.2s ease, border 0.2s ease;
+}
+
+.profile-pfp:hover {
+  transform: scale(1.03);
+  border-color: #666;
+}
+
+/* Wrapper to show hover overlay */
 .pfp-wrapper {
   position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  overflow: hidden;
   cursor: pointer;
 }
 
-.profile-pfp {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 50%;
-  transition: opacity 0.3s ease;
-}
-
+/* Overlay for pencil icon */
 .pfp-overlay {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4);
-  color: white;
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: #fff;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: 0.3s ease;
 }
 
 .pfp-wrapper:hover .pfp-overlay {
   opacity: 1;
 }
 
-.pfp-wrapper:hover .profile-pfp {
-  opacity: 0.7;
+/* Username styling */
+h2 {
+  color: #eaeaea;
+  font-weight: 600;
+  font-size: 1.75rem;
 }
 
-.pfp-overlay i {
-  font-size: 24px;
+/* Modal Dark Theme */
+.modal-content {
+  background-color: #1b1b1b;
+  color: #ddd;
+  border-radius: 12px;
+}
+
+.modal-header,
+.modal-footer {
+  border: none;
+}
+
+.modal-title {
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+input[type="file"] {
+  background-color: #2b2b2b;
+  color: #ccc;
+  border: 1px solid #444;
+  padding: 8px;
+  border-radius: 8px;
+  width: 100%;
+}
+
+input[type="file"]::file-selector-button {
+  background-color: #444;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.spinner-border {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-width: 0.2em;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 576px) {
+  .container.mt-4.d-flex {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .container.mt-4.d-flex h2 {
+    margin-top: 0.75rem;
+    font-size: 1.5rem;
+  }
 }
