@@ -1,4 +1,3 @@
-// src/components/BlogGrid.jsx
 import { useEffect, useState } from "react";
 import {
   collection,
@@ -13,6 +12,7 @@ import {
 import { db, auth } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import "../styles/BlogGrid.css";  // Make sure you import the CSS
 
 function BlogGrid({ page, blogs: externalBlogs }) {
   const [blogs, setBlogs] = useState([]);
@@ -136,8 +136,7 @@ function BlogGrid({ page, blogs: externalBlogs }) {
           const likesCount = blog.likes ? blog.likes.length : 0;
           const isLiked = blog.likes?.includes(auth.currentUser?.uid);
           const author = authorProfiles[blog.authorId];
-          const profilePictureUrl =
-            author?.profilePic || "/default.png";
+          const profilePictureUrl = author?.profilePic || "/default.png";
 
           return (
             <div className="col-md-4 mb-4" key={blog.id}>
@@ -162,26 +161,19 @@ function BlogGrid({ page, blogs: externalBlogs }) {
                 <div className="card-body d-flex flex-column">
                   <h5 className="card-title">{blog.title}</h5>
                   <p className="card-text">{blog.content}</p>
-                  <div className="d-flex align-items-center mt-auto mb-2">
+                  <div className="d-flex flex-row justify-content-between">
+                  <div className="author-info">
                     <img
                       src={profilePictureUrl}
                       alt="Author"
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                        marginRight: "8px",
-                      }}
                     />
                     <a
-                      href="#!"
                       onClick={() => navigate(`/profile/${blog.authorName}`)}
-                      className="text-muted text-decoration-none"
                     >
                       {blog.authorName}
                     </a>
                   </div>
+                  <div className="buttons">
                   <button
                     className={`btn btn-sm ${
                       isLiked ? "btn-danger" : "btn-outline-danger"
@@ -190,6 +182,7 @@ function BlogGrid({ page, blogs: externalBlogs }) {
                   >
                     {isLiked ? "♥" : "♡"} {likesCount}
                   </button>
+
                   {page === "Profile" &&
                     blog.authorId === auth.currentUser?.uid && (
                       <button
@@ -199,6 +192,8 @@ function BlogGrid({ page, blogs: externalBlogs }) {
                         Delete
                       </button>
                     )}
+                    </div>
+                 </div>   
                 </div>
               </div>
             </div>
