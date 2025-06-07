@@ -124,9 +124,9 @@ function Profile() {
     <div className="flex min-h-screen flex-col ">
       <div className="flex gap-4 items-center text-2xl sm:flex-col lg:flex-row max-w-screen-2xl mx-auto">
         {isOwnProfile ? (
-          <div className="w-32 relative group">
+          <div className="w-32 h-32 relative group">
             <img
-              className="w-full rounded-full"
+              className="w-full h-full rounded-full"
               src={pfp === "" ? "/default.png" : pfp}
               alt="profile"
             />
@@ -149,7 +149,7 @@ function Profile() {
           </div>
         ) : (
           <img
-            className="rounded-full"
+            className="rounded-full w-32 h-32"
             src={pfp === "" ? "/default.png" : pfp}
             alt="profile"
           />

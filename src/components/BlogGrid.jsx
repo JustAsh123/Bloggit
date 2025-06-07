@@ -11,7 +11,7 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -149,6 +149,7 @@ function BlogGrid({ page, blogs: externalBlogs }) {
             <h2 className="card-title text-xl font-semibold line-clamp-1">{blog.title}</h2>
             <p className="text-sm text-gray-300 line-clamp-3">{blog.content}</p>
             <div className="card-actions justify-between items-center mt-4">
+              <Link to={`/profile/${blog.authorName}`}>
               <div className="flex items-center">
                 <img
                   src={profilePictureUrl}
@@ -156,7 +157,7 @@ function BlogGrid({ page, blogs: externalBlogs }) {
                   alt="Author"
                 />
                 <p className="ml-3 font-medium">{blog.authorName}</p>
-              </div>
+              </div></Link>
               <button
                 className={`btn btn-sm ${
                   isLiked ? "btn-error" : "btn-outline btn-secondary"
