@@ -12,13 +12,13 @@ import {
 import { db, auth } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import "../styles/BlogGrid.css";  // Make sure you import the CSS
+import { Heart } from "lucide-react";
+import toast from "react-hot-toast";
 
 function BlogGrid({ page, blogs: externalBlogs }) {
   const [blogs, setBlogs] = useState([]);
   const { username, loading } = useAuth();
   const navigate = useNavigate();
-  const [imageOrientations, setImageOrientations] = useState({});
   const [authorProfiles, setAuthorProfiles] = useState({});
 
   useEffect(() => {
@@ -39,7 +39,9 @@ function BlogGrid({ page, blogs: externalBlogs }) {
         let filteredBlogs = blogList;
         if (page === "Profile") {
           if (!username || loading) return;
-          filteredBlogs = blogList.filter((blog) => blog.authorName === username);
+          filteredBlogs = blogList.filter(
+            (blog) => blog.authorName === username
+          );
         }
 
         setBlogs(filteredBlogs);
@@ -71,17 +73,9 @@ function BlogGrid({ page, blogs: externalBlogs }) {
     }
   }, [page, username, loading, externalBlogs]);
 
-  const onImageLoad = (e, blogId) => {
-    const { naturalWidth, naturalHeight } = e.target;
-    setImageOrientations((prev) => ({
-      ...prev,
-      [blogId]: naturalHeight > naturalWidth ? "portrait" : "landscape",
-    }));
-  };
-
   const toggleLike = async (blogId) => {
     if (!auth.currentUser) {
-      alert("You must be logged in to like posts!");
+      toast.error("You must be logged in to do that.")
       return;
     }
 
@@ -116,7 +110,9 @@ function BlogGrid({ page, blogs: externalBlogs }) {
   };
 
   const handleDelete = async (blogId) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this blog?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this blog?"
+    );
     if (!confirmDelete) return;
 
     try {
@@ -129,78 +125,56 @@ function BlogGrid({ page, blogs: externalBlogs }) {
   };
 
   return (
-    <div className="container mt-4">
-      <div className="row">
-        {blogs.map((blog) => {
-          const orientation = imageOrientations[blog.id] || "landscape";
-          const likesCount = blog.likes ? blog.likes.length : 0;
-          const isLiked = blog.likes?.includes(auth.currentUser?.uid);
-          const author = authorProfiles[blog.authorId];
-          const profilePictureUrl = author?.profilePic || "/default.png";
+    <div className="px-2 py-10 max-w-screen-2xl mx-auto">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 justify-items-center">
+    {blogs.map((blog) => {
+      const likesCount = blog.likes ? blog.likes.length : 0;
+      const isLiked = blog.likes?.includes(auth.currentUser?.uid);
+      const author = authorProfiles[blog.authorId];
+      const profilePictureUrl = author?.profilePic || "/default.png";
 
-          return (
-            <div className="col-md-4 mb-4" key={blog.id}>
-              <div className="card h-100">
-                {blog.imageUrl && (
-                  <img
-                    src={blog.imageUrl}
-                    alt="Blog Cover"
-                    onLoad={(e) => onImageLoad(e, blog.id)}
-                    style={
-                      orientation === "portrait"
-                        ? {
-                            width: "auto",
-                            maxHeight: "300px",
-                            display: "block",
-                            margin: "0 auto",
-                          }
-                        : { width: "100%", height: "auto" }
-                    }
-                  />
-                )}
-                <div className="card-body d-flex flex-column">
-                  <h5 className="card-title">{blog.title}</h5>
-                  <p className="card-text">{blog.content}</p>
-                  <div className="d-flex flex-row justify-content-between">
-                  <div className="author-info">
-                    <img
-                      src={profilePictureUrl}
-                      alt="Author"
-                    />
-                    <a
-                      onClick={() => navigate(`/profile/${blog.authorName}`)}
-                    >
-                      {blog.authorName}
-                    </a>
-                  </div>
-                  <div className="buttons">
-                  <button
-                    className={`btn btn-sm ${
-                      isLiked ? "btn-danger" : "btn-outline-danger"
-                    }`}
-                    onClick={() => toggleLike(blog.id)}
-                  >
-                    {isLiked ? "♥" : "♡"} {likesCount}
-                  </button>
-
-                  {page === "Profile" &&
-                    blog.authorId === auth.currentUser?.uid && (
-                      <button
-                        className="btn btn-sm btn-outline-secondary mt-2"
-                        onClick={() => handleDelete(blog.id)}
-                      >
-                        Delete
-                      </button>
-                    )}
-                    </div>
-                 </div>   
-                </div>
+      return (
+        <div
+          key={blog.id}
+          className="card bg-base-300 border shadow-md w-[25rem] transition duration-300 ease-in-out transform hover:scale-[1.015] hover:shadow-lg"
+        >
+          <figure className="h-72 w-full overflow-hidden rounded-t-md">
+            <img
+              src={blog.imageUrl}
+              className="w-full h-full"
+              alt="Blog"
+            />
+          </figure>
+          <div className="card-body">
+            <h2 className="card-title text-xl font-semibold line-clamp-1">{blog.title}</h2>
+            <p className="text-sm text-gray-300 line-clamp-3">{blog.content}</p>
+            <div className="card-actions justify-between items-center mt-4">
+              <div className="flex items-center">
+                <img
+                  src={profilePictureUrl}
+                  className="w-10 h-10 rounded-full object-cover"
+                  alt="Author"
+                />
+                <p className="ml-3 font-medium">{blog.authorName}</p>
               </div>
+              <button
+                className={`btn btn-sm ${
+                  isLiked ? "btn-error" : "btn-outline btn-secondary"
+                }`}
+                onClick={() => toggleLike(blog.id)}
+              >
+                <Heart size={18} />
+                {likesCount}
+              </button>
             </div>
-          );
-        })}
-      </div>
-    </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+
   );
 }
 

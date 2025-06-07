@@ -1,12 +1,19 @@
 // src/pages/Profile.jsx
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where, updateDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import BlogGrid from "../components/BlogGrid";
-import "../styles/Profile.css";
 import { Pencil } from "lucide-react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 function Profile() {
@@ -15,7 +22,6 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [pfp, setPfp] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [uploading, setUploading] = useState(false); // NEW
   const { username } = useAuth();
   const navigate = useNavigate();
 
@@ -24,21 +30,25 @@ function Profile() {
   const handleChangePfp = async () => {
     if (!selectedFile) return;
 
-    setUploading(true);
-
     const formData = new FormData();
     formData.append("file", selectedFile);
     formData.append("upload_preset", "blog_uploads");
 
     try {
-      const res = await fetch("https://api.cloudinary.com/v1_1/djxmd61lq/image/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/djxmd61lq/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       const data = await res.json();
       const imageUrl = data.secure_url;
 
-      const q = query(collection(db, "users"), where("username", "==", username));
+      const q = query(
+        collection(db, "users"),
+        where("username", "==", username)
+      );
       const snap = await getDocs(q);
       if (!snap.empty) {
         const userDoc = snap.docs[0];
@@ -52,10 +62,15 @@ function Profile() {
     } catch (error) {
       console.error("Error uploading profile pic:", error);
     } finally {
-      setUploading(false);
-      document.getElementById("closeModalBtn")?.click();
+      toast.success("Pfp Changed.");
     }
   };
+
+  useEffect(() => {
+    if (selectedFile) {
+      handleChangePfp();
+    }
+  }, [selectedFile]);
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -87,6 +102,7 @@ function Profile() {
         if (!snap.empty) {
           const userData = snap.docs[0].data();
           setPfp(userData.profilePic || "");
+          console.log(pfp);
         } else {
           setPfp("");
         }
@@ -105,26 +121,35 @@ function Profile() {
   if (loading) return <p className="text-center mt-4">Loading profile...</p>;
 
   return (
-    <>
-      <div className="container mt-4 d-flex align-items-center gap-3">
+    <div className="flex min-h-screen flex-col ">
+      <div className="flex gap-4 items-center text-2xl sm:flex-col lg:flex-row max-w-screen-2xl mx-auto">
         {isOwnProfile ? (
-          <div
-            className="pfp-wrapper"
-            data-bs-toggle="modal"
-            data-bs-target="#exampleModal"
-          >
+          <div className="w-32 relative group">
             <img
-              className="profile-pfp"
+              className="w-full rounded-full"
               src={pfp === "" ? "/default.png" : pfp}
               alt="profile"
             />
-            <div className="pfp-overlay">
-              <Pencil size={24} />
-            </div>
+
+            {/* Overlay and Pencil Icon */}
+            <label className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+              <Pencil className="text-white w-6 h-6" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setSelectedFile(file);
+                  }
+                }}
+                className="hidden"
+              />
+            </label>
           </div>
         ) : (
           <img
-            className="profile-pfp"
+            className="rounded-full"
             src={pfp === "" ? "/default.png" : pfp}
             alt="profile"
           />
@@ -132,65 +157,8 @@ function Profile() {
         <h2>{displayName}</h2>
       </div>
 
-      {/* Modal for changing PFP */}
-      <div
-        className="modal fade"
-        id="exampleModal"
-        tabIndex="-1"
-        aria-labelledby="exampleModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="exampleModalLabel">
-                Change PFP
-              </h1>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-                id="closeModalBtn" // NEW
-              ></button>
-            </div>
-            <div className="modal-body">
-              {uploading ? (
-                <div className="text-center">
-                  <div className="spinner-border text-primary" role="status"></div>
-                  <p className="mt-2">Uploading image...</p>
-                </div>
-              ) : (
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setSelectedFile(e.target.files[0])}
-                />
-              )}
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleChangePfp}
-                disabled={uploading} // Disable button while uploading
-              >
-                Save changes
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <BlogGrid blogs={blogs} page="Profile" />
-    </>
+    </div>
   );
 }
 

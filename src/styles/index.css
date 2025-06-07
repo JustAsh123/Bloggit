@@ -1,5 +1,9 @@
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #121212;
-  color: #ddd;
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: all;
 }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');

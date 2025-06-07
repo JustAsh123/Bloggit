@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import UploadBlog from "./pages/UploadBlog";
 import { Routes,Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const { username } = useAuth(); // we just access to trigger context
@@ -25,6 +26,7 @@ function App() {
         <Route path="/profile/:displayName" element={<Profile />} />
         <Route path="/upload" element={<UploadBlog />} />
       </Routes>
+      <Toaster></Toaster>
     </>
   );
 }
