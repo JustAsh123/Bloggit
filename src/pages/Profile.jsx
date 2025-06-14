@@ -80,10 +80,17 @@ function Profile() {
           where("authorName", "==", displayName)
         );
         const snap = await getDocs(q);
-        const userBlogs = snap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const userBlogs = snap.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .sort((a, b) => {
+            const aTime = a.createdAt?.toMillis?.() || 0;
+            const bTime = b.createdAt?.toMillis?.() || 0;
+            return bTime - aTime; // newest first
+          });
+
         setBlogs(userBlogs);
       } catch (err) {
         console.error("Error fetching user blogs:", err);
@@ -157,7 +164,7 @@ function Profile() {
         <h2>{displayName}</h2>
       </div>
 
-      <BlogGrid blogs={blogs} page="Profile" />
+      <BlogGrid blogs={blogs} page="profile" />
     </div>
   );
 }
